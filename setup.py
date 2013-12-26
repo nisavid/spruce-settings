@@ -13,31 +13,27 @@ from setuptools import find_packages as _find_packages, setup as _setup
 
 NAME_NOPREFIX = 'settings'
 
-NAME = 'nisavid-' + NAME_NOPREFIX
+NAME = 'Spruce-' + NAME_NOPREFIX
 
-VERSION = '0'
+VERSION = '0.1.0'
 
 SITE_URI = ''
 
-DESCRIPTION = 'Application settings.'
+DESCRIPTION = 'Application settings'
 
-LONG_DESCRIPTION = DESCRIPTION + '''
+README_FILE = 'README.rst'
+with open(README_FILE, 'r') as _file:
+    README = _file.read()
 
-Some applications require certain settings to exist before they are
-launched.  Some applications require the ability to save certain
-settings so that they persist after termination.  It is desirable to
-access both persistent and runtime settings via a uniform interface.
-This package provides objects that satisfy these requirements.
+CHANGES_FILE = 'CHANGES.rst'
+with open(CHANGES_FILE, 'r') as _file:
+    CHANGES = _file.read()
 
-Settings may be stored in a variety of ways.  Windows uses a system
-registry.  OS X uses XML preferences files.  Many Unix applications use
-INI-style configuration (conf) files.  It is desirable to store some
-settings in a database.  For now, this module implements only the conf
-file method, but it provides enough abstraction to allow for other
-methods to be implemented as needed.
-'''
+LICENSE_FILE = 'LICENSE'
+with open(LICENSE_FILE, 'r') as _file:
+    LICENSE = _file.read()
 
-LICENSE = 'LGPLv3'
+LONG_DESCRIPTION = '\n\n'.join((README, CHANGES))
 
 TROVE_CLASSIFIERS = \
     ('Development Status :: 5 - Production/Stable',
@@ -54,7 +50,7 @@ TROVE_CLASSIFIERS = \
 
 SETUP_DEPS = ()
 
-INSTALL_DEPS = ('nisavid-collections',)
+INSTALL_DEPS = ('spruce-collections',)
 
 EXTRAS_DEPS = {}
 
@@ -65,7 +61,7 @@ DEPS_SEARCH_URIS = ()
 
 # packages --------------------------------------------------------------------
 
-PARENT_NAMESPACE_PKG = 'nisavid'
+PARENT_NAMESPACE_PKG = 'spruce'
 
 ROOT_PKG = '.'.join((PARENT_NAMESPACE_PKG, NAME_NOPREFIX))
 

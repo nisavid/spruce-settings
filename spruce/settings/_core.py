@@ -6,7 +6,7 @@ __docformat__ = "restructuredtext"
 from collections import Mapping as _Mapping, namedtuple as _namedtuple
 from datetime import datetime as _datetime, timedelta as _timedelta
 
-from nisavid.collections import odict as _odict
+from spruce.collections import odict as _odict
 
 from . import _exc
 
@@ -17,7 +17,7 @@ class Settings(object):
 
     Example usage::
 
-        import nisavid.settings as _settings
+        import spruce.settings as _settings
 
         settings = _settings.Settings(organization='myorg',
                                       application='myapp')
@@ -307,7 +307,7 @@ class Settings(object):
           * if *required* is false, *default* is returned.
 
           * if *required* is true, a
-            :exc:`~nisavid.settings._exc.MissingRequiredSettingsValue` is
+            :exc:`~spruce.settings._exc.MissingRequiredSettingsValue` is
             raised.
 
         The acceptable case-insensitive representations of boolean values are
@@ -337,11 +337,11 @@ class Settings(object):
 
         :rtype: :obj:`bool` or null
 
-        :raise nisavid.settings.InvalidSettingsValue:
+        :raise spruce.settings.InvalidSettingsValue:
             Raised if the value is not one of the acceptable boolean
             representations.
 
-        :raise nisavid.settings.MissingRequiredSettingsValue:
+        :raise spruce.settings.MissingRequiredSettingsValue:
             Raised if *required* is true and the setting is not found.
 
         """
@@ -645,7 +645,7 @@ class Settings(object):
           * if *required* is false, *default* is returned.
 
           * if *required* is true, a
-            :exc:`~nisavid.settings._exc.MissingRequiredSettingsValue` is
+            :exc:`~spruce.settings._exc.MissingRequiredSettingsValue` is
             raised.
 
         .. note::
@@ -667,10 +667,10 @@ class Settings(object):
 
         :rtype: :obj:`float` or null
 
-        :raise nisavid.settings.InvalidSettingsValue:
+        :raise spruce.settings.InvalidSettingsValue:
             Raised if the value cannot be converted to a :obj:`float`.
 
-        :raise nisavid.settings.MissingRequiredSettingsValue:
+        :raise spruce.settings.MissingRequiredSettingsValue:
             Raised if *required* is true and the setting is not found.
 
         """
@@ -729,7 +729,7 @@ class Settings(object):
           * if *required* is false, *default* is returned.
 
           * if *required* is true, a
-            :exc:`~nisavid.settings._exc.MissingRequiredSettingsValue` is
+            :exc:`~spruce.settings._exc.MissingRequiredSettingsValue` is
             raised.
 
         .. note::
@@ -751,10 +751,10 @@ class Settings(object):
 
         :rtype: :obj:`int` or null
 
-        :raise nisavid.settings.InvalidSettingsValue:
+        :raise spruce.settings.InvalidSettingsValue:
             Raised if the value cannot be converted to an :obj:`int`.
 
-        :raise nisavid.settings.MissingRequiredSettingsValue:
+        :raise spruce.settings.MissingRequiredSettingsValue:
             Raised if *required* is true and the setting is not found.
 
         """
@@ -787,7 +787,7 @@ class Settings(object):
           * if *required* is false, *default* is returned.
 
           * if *required* is true, a
-            :exc:`~nisavid.settings._exc.MissingRequiredSettingsValue` is
+            :exc:`~spruce.settings._exc.MissingRequiredSettingsValue` is
             raised.
 
         The given separator *sep* is used to identify the items of the list.
@@ -821,7 +821,7 @@ class Settings(object):
 
         :rtype: [:obj:`str`] or null
 
-        :raise nisavid.settings.MissingRequiredSettingsValue:
+        :raise spruce.settings.MissingRequiredSettingsValue:
             Raised if *required* is true and the setting is not found.
 
         """
@@ -1050,7 +1050,7 @@ class Settings(object):
             Raised if an error is encountered outside the Python system while
             reading or writing settings to persistent storage.
 
-        :raise nisavid.settings.MalformedSettingsLocation:
+        :raise spruce.settings.MalformedSettingsLocation:
             Raised if a malformed settings location is encountered.
 
         """
@@ -1141,7 +1141,7 @@ class Settings(object):
           * if *required* is false, *default* is returned.
 
           * if *required* is true, a
-            :exc:`~nisavid.settings._exc.MissingRequiredSettingsValue` is
+            :exc:`~spruce.settings._exc.MissingRequiredSettingsValue` is
             raised.
 
         If the setting is blank, an empty string is returned.
@@ -1162,7 +1162,7 @@ class Settings(object):
 
         :rtype: :obj:`str` or null
 
-        :raise nisavid.settings.MissingRequiredSettingsValue:
+        :raise spruce.settings.MissingRequiredSettingsValue:
             Raised if *required* is true and the setting is not found.
 
         """
@@ -1228,7 +1228,7 @@ class Settings(object):
                   * :exc:`~exceptions.EnvironmentError` is raised if an error
                     is encountered outside the Python system.
 
-                  * :exc:`~nisavid.settings._exc.MalformedSettingsLocation` is
+                  * :exc:`~spruce.settings._exc.MalformedSettingsLocation` is
                     raised if a malformed location is encountered.
         :type read_func: :obj:`file`, [:obj:`str`] -> {:obj:`str`: :obj:`str`}
 
@@ -1252,7 +1252,7 @@ class Settings(object):
                   * :exc:`~exceptions.EnvironmentError` is raised if an error
                     is encountered outside the Python system.
 
-                  * :exc:`~nisavid.settings._exc.MalformedSettingsLocation` is
+                  * :exc:`~spruce.settings._exc.MalformedSettingsLocation` is
                     raised if a malformed location is encountered.
         :type write_func: :obj:`file`, {:obj:`str`: :obj:`str`} ->
 
