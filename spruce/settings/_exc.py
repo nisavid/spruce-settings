@@ -3,14 +3,20 @@
 __copyright__ = "Copyright (C) 2014 Ivan D Vasin"
 __docformat__ = "restructuredtext"
 
+import exceptions as _py_exc
 
-class SettingsError(RuntimeError):
-    """There is an error in some persistent settings."""
+
+class Exception(_py_exc.Exception):
     pass
 
 
-class InvalidSettingsValue(SettingsError):
-    """A settings value is invalid.
+class Error(RuntimeError, Exception):
+    pass
+
+
+class InvalidSettingsValue(Error):
+
+    """A settings value is invalid
 
     This represents an invalid *value* for a given *key*.
 
@@ -31,25 +37,44 @@ class InvalidSettingsValue(SettingsError):
     :type message: :obj:`str` or null
 
     """
-    def __init__(self, key, value, type=None, message=None):
 
-        self.key = key
-        self.value = value
-        self.type = type
-        self.message_ = message
+    def __init__(self, key, value, type=None, message=None, *args):
+        super(InvalidSettingsValue, self).__init__(key, value, type, message,
+                                                   *args)
+        self._key = key
+        self._message = message
+        self._type = type
+        self._value = value
 
-        value_string = 'value {!r} for {!r}'.format(value, key)
-        if type:
-            value_string = '{} {}'.format(type, value_string)
-        message_ = 'invalid {} in persistent settings'.format(value_string)
-        if message:
-            message_ += ': {}'.format(message)
+    def __str__(self):
+        value_str = u'value {!r} for {!r}'.format(self.value, self.key)
+        if self.type:
+            value_str = u'{} {}'.format(self.type, value_str)
+        message = u'invalid {} in persistent settings'.format(value_str)
+        if self.message:
+            message += u': {}'.format(self.message)
+        return message
 
-        super(InvalidSettingsValue, self).__init__(message_)
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def message(self):
+        return self._message
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def value(self):
+        return self._value
 
 
-class MalformedSettingsLocation(SettingsError):
-    """A settings location is malformed.
+class MalformedSettingsLocation(Error):
+
+    """A settings location is malformed
 
     :param location:
         A settings location.
@@ -60,22 +85,33 @@ class MalformedSettingsLocation(SettingsError):
     :type message: :obj:`str` or null
 
     """
-    def __init__(self, location=None, message=None):
 
-        self.location = location
-        self.message_ = message
+    def __init__(self, location=None, message=None, *args):
+        super(MalformedSettingsLocation, self).__init__(location, message,
+                                                        *args)
+        self._location = location
+        self._message = message
 
-        message_ = 'malformed persistent settings'
-        if location:
-            message_ += ' at {!r}'.format(location)
-        if message:
-            message_ += ': {}'.format(message)
+    def __str__(self):
+        message = 'malformed persistent settings'
+        if self.location:
+            message += u' at {!r}'.format(self.location)
+        if self.message:
+            message += u': {}'.format(self.message)
+        return message
 
-        super(MalformedSettingsLocation, self).__init__(message_)
+    @property
+    def location(self):
+        return self._location
+
+    @property
+    def message(self):
+        return self._message
 
 
-class MissingRequiredSettingsValue(SettingsError):
-    """A required value is missing.
+class MissingRequiredSettingsValue(Error):
+
+    """A required value is missing
 
     This represents a missing value for a given *key*, optionally
     specifying the expected *type* and inspected *locations*.
@@ -98,18 +134,32 @@ class MissingRequiredSettingsValue(SettingsError):
     :type locations: ~[:obj:`str`] or null
 
     """
-    def __init__(self, key, type=None, locations=None):
 
-        self.key = key
-        self.type = type
-        self.locations = locations
+    def __init__(self, key, type=None, locations=None, *args):
+        super(MissingRequiredSettingsValue, self).__init__(key, type,
+                                                           locations, *args)
+        self._key = key
+        self._locations = locations
+        self._type = type
 
-        required_value_string = 'value for {!r}'.format(key)
-        if type:
-            required_value_string = '{} {}'.format(type, required_value_string)
-        message = 'missing required {} in persistent settings'\
-                      .format(required_value_string)
-        if locations:
-            message += ' at {}'.format(locations)
+    def __str__(self):
+        required_value_str = u'value for {!r}'.format(self.key)
+        if self.type:
+            required_value_str = u'{} {}'.format(self.type, required_value_str)
+        message = u'missing required {} in persistent settings'\
+                   .format(required_value_str)
+        if self.locations:
+            message += u' at {}'.format(self.locations)
+        return message
 
-        super(MissingRequiredSettingsValue, self).__init__(message)
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def locations(self):
+        return self._locations
+
+    @property
+    def type(self):
+        return self._type
