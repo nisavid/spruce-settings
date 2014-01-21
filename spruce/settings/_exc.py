@@ -1,4 +1,4 @@
-"""Exceptions."""
+"""Exceptions"""
 
 __copyright__ = "Copyright (C) 2014 Ivan D Vasin"
 __docformat__ = "restructuredtext"
@@ -22,8 +22,8 @@ class InvalidSettingsValue(SettingsError):
 
     :param type:
         A settings value type.  The name of one of the types handled by a
-        corresponding :samp:`Settings.{type}value()` method.  :obj:`None`
-        implies the generic type, a string.
+        corresponding :samp:`Settings.{type}value()` method.  Null implies
+        the generic type, a string.
     :type type: :obj:`str` or null
 
     :param message:

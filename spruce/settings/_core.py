@@ -1,4 +1,67 @@
-"""Application settings core."""
+"""Application settings core
+
+
+********
+Examples
+********
+
+Single use
+==========
+
+::
+
+    import spruce.settings as _settings
+
+    settings = _settings.Settings(organization='myorg',
+                                  application='myapp')
+    with settings.open(), settings.ingroup('db'):
+        dbserver = settings.value('server', required=True)
+        dbport = settings.intvalue('port')
+        db_entity_tables = settings.listvalue('entity_tables')
+
+
+Multiple uses
+=============
+
+::
+
+    import spruce.settings as _settings
+
+    settings = _settings.Settings(organization='myorg',
+                                  application='myapp')
+    with settings.open():
+        with settings.ingroup('dbconn'):
+            dbserver = settings.value('server', required=True)
+            dbport = settings.intvalue('port')
+
+        with settings.ingroup('dbtables'):
+            db_entity_tables = settings.listvalue('entity_tables')
+
+
+Factory method
+==============
+
+::
+
+    from collections import namedtuple as _namedtuple
+
+    import spruce.settings as _settings
+
+    class User(_namedtuple('User', ('name', 'password'))):
+        @classmethod
+        def from_settings(cls, settings, group=None, name_key='name',
+                          password_key='password'):
+            with settings.ingroup(group):
+                name = settings.value(name_key, required=True)
+                password = settings.value(password_key, required=True)
+            return cls(name=name, password=password)
+
+    settings = _settings.Settings(organization='myorg',
+                                  application='myapp')
+    with settings.open():
+        user = User.from_settings(settings, 'user')
+
+"""
 
 __copyright__ = "Copyright (C) 2014 Ivan D Vasin"
 __docformat__ = "restructuredtext"
@@ -14,18 +77,7 @@ from . import _exc
 
 class Settings(object):
 
-    """Application settings.
-
-    Example usage::
-
-        import spruce.settings as _settings
-
-        settings = _settings.Settings(organization='myorg',
-                                      application='myapp')
-        with settings.open(), settings.ingroup('dbconn'):
-            dbserver = settings.value('server', required=True)
-            dbport = settings.intvalue('port')
-            db_entity_tables = settings.listvalue('entity_tables')
+    """Application settings
 
     Objects of this class maintain a current group.  By default, there is no
     current group, but one may be specified by one or more :meth:`ingroup`
@@ -154,7 +206,7 @@ class Settings(object):
         self.close()
 
     def absname(self, name):
-        """The absolute name of a group or key.
+        """The absolute name of a group or key
 
         :param str name:
             The name of a group or key.
@@ -174,7 +226,7 @@ class Settings(object):
     def all_groups(self):
         """
         An iterable over all groups, including subgroups, that can be read by
-        this settings object in the current group.
+        this settings object in the current :attr:`group`
 
         .. note::
             This includes the groups provided by :attr:`defaults`.
@@ -196,7 +248,7 @@ class Settings(object):
     def all_keys(self):
         """
         An iterable over all keys, including subkeys, that can be read by this
-        settings object in the current group.
+        settings object in the current :attr:`group`
 
         .. note::
             This includes the keys provided by :attr:`defaults`.
@@ -212,7 +264,7 @@ class Settings(object):
 
     @property
     def application(self):
-        """The application name used for storing and retrieving settings.
+        """The application name used for storing and retrieving settings
 
         .. seealso::
             :attr:`base_scope`, :attr:`component_scope`, :attr:`format`,
@@ -225,7 +277,7 @@ class Settings(object):
 
     @property
     def base_scope(self):
-        """The base scope.
+        """The base scope
 
         This is either :code:`'user'` or :code:`'system'`.
 
@@ -236,7 +288,7 @@ class Settings(object):
 
     @property
     def base_scope_fallback(self):
-        """Whether fallback is enabled between the base scopes.
+        """Whether fallback is enabled between the base scopes
 
         If :obj:`True`, any key not found in the current user's settings will
         be searched for in the system-wide settings.
@@ -260,7 +312,7 @@ class Settings(object):
 
         """
         The value of the setting identified by some key, converted to
-        a :obj:`bool`.
+        a :obj:`bool`
 
         If the setting is not found, then
 
@@ -326,7 +378,7 @@ class Settings(object):
 
     @property
     def cache_lifespan(self):
-        """The maximum age of the internal cache.
+        """The maximum age of the internal cache
 
         This is the amount of time after the cache's creation after which a
         subsequent access will automatically be preceded by a synchronization.
@@ -351,7 +403,7 @@ class Settings(object):
     @property
     def child_groups(self):
         """
-        An iterable over the non-empty top-level groups in the current group.
+        An iterable over the non-empty top-level groups in the current group
 
         It is possible to navigate the entire setting hierarchy using
         :attr:`child_keys` and :attr:`child_groups` recursively.
@@ -369,7 +421,7 @@ class Settings(object):
 
     @property
     def child_keys(self):
-        """An iterable over the top-level keys in the current group.
+        """An iterable over the top-level keys in the current group
 
         It is possible to navigate the entire setting hierarchy using
         :attr:`child_keys` and :attr:`child_groups` recursively.
@@ -386,7 +438,7 @@ class Settings(object):
                 for key in filter(self._is_child_key, self._cache.keys()))
 
     def clear(self):
-        """Remove all entries in the primary location.
+        """Remove all entries in the primary location
 
         Entries in fallback locations are not removed.
 
@@ -420,7 +472,7 @@ class Settings(object):
 
     @property
     def component_scope(self):
-        """The component scope.
+        """The component scope
 
         This is one of :code:`'organization'`, :code:`'application'`, or
         :code:`'subsystem'`.
@@ -432,7 +484,7 @@ class Settings(object):
 
     def component_scope_fallback(self, lesser_component, greater_component):
 
-        """Whether fallback is enabled between two component scopes.
+        """Whether fallback is enabled between two component scopes
 
         If :obj:`True`, any key not found in *lesser_component* will be
         searched for in *greater_component*.
@@ -486,7 +538,7 @@ class Settings(object):
     def contains(self, key):
         """
         Whether there exists a setting identified by some key in the current
-        group.
+        group
 
         .. seealso:: :meth:`set_value` and :meth:`value`
 
@@ -500,7 +552,7 @@ class Settings(object):
 
     def copy(self):
 
-        """A copy of these settings.
+        """A copy of these settings
 
         :rtype: :class:`Settings`
 
@@ -531,7 +583,7 @@ class Settings(object):
 
     @property
     def defaults(self):
-        """A mapping of default settings.
+        """A mapping of default settings
 
         This may be a mapping of keys to values, or it may be a mapping of
         groups to subgroups to keys to values, or any combination thereof.  A
@@ -582,7 +634,7 @@ class Settings(object):
 
         """
         The value of the setting identified by some key, converted to a
-        :obj:`float`.
+        :obj:`float`
 
         If the setting is not found, then
 
@@ -638,7 +690,7 @@ class Settings(object):
 
     @property
     def format(self):
-        """The format used for storing and retrieving settings.
+        """The format used for storing and retrieving settings
 
         .. seealso::
             :attr:`application`, :attr:`base_scope`, :attr:`component_scope`,
@@ -681,13 +733,14 @@ class Settings(object):
 
         .. seealso:: :attr:`group`
 
-        :param str group:
-            The new current group.  This can be nested.
+        :param group:
+            The new current group.  This can be nested.  If null, the current
+            group is unchanged.
+        :type group: :obj:`str` or null
 
         :return:
-            A context in which the is the given
-            *group*, evaluated relative to the current group in the calling
-            context.
+            A context in which the current group is the given *group*,
+            evaluated relative to the current group in the calling context.
         :rtype: context
 
         """
@@ -711,7 +764,7 @@ class Settings(object):
 
         """
         The value of the setting identified by some key, converted to an
-        :obj:`int`.
+        :obj:`int`
 
         If the setting is not found, then
 
@@ -769,7 +822,7 @@ class Settings(object):
 
         """
         The value of the setting identified by some key, converted to a
-        :obj:`list`.
+        :obj:`list`
 
         If the setting is not found, then
 
@@ -852,7 +905,7 @@ class Settings(object):
 
     @property
     def locations(self):
-        """The locations that were used in the last :meth:`sync`.
+        """The locations that were used in the last :meth:`sync`
 
         These are determined by :attr:`base_scope`, :attr:`component_scope`,
         :attr:`organization`, :attr:`application`, and :attr:`subsystem`
@@ -884,7 +937,7 @@ class Settings(object):
 
     @property
     def organization(self):
-        """The organization name used for storing and retrieving settings.
+        """The organization name used for storing and retrieving settings
 
         .. seealso::
             :attr:`application`, :attr:`base_scope`, :attr:`component_scope`,
@@ -897,7 +950,7 @@ class Settings(object):
 
     @property
     def primary_path(self):
-        """A path to the primary location.
+        """A path to the primary location
 
         .. seealso:: :attr:`format` and :attr:`writable`
 
@@ -908,7 +961,7 @@ class Settings(object):
 
     def remove(self, key):
         """
-        Remove the setting identified by some key and all of its subkeys.
+        Remove the setting identified by some key and all of its subkeys
 
         Entries in fallback locations are not removed.
 
@@ -931,7 +984,7 @@ class Settings(object):
     def set_component_scope_fallback(self, lesser_component, greater_component,
                                      enabled):
 
-        """Set whether fallback is enabled between two component scopes.
+        """Set whether fallback is enabled between two component scopes
 
         If *enabled* is true, any key not found in *lesser_component* will
         be searched for in *greater_component*.
@@ -987,7 +1040,7 @@ class Settings(object):
 
     def set_value(self, key, value):
 
-        """Assign a value to the setting identified by some key.
+        """Assign a value to the setting identified by some key
 
         If *value* is not a string object, then :samp:`repr({value})` is the
         actual value assigned.
@@ -1021,7 +1074,7 @@ class Settings(object):
 
     @property
     def subsystem(self):
-        """The subsystem name used for storing and retrieving settings.
+        """The subsystem name used for storing and retrieving settings
 
         .. seealso::
             :attr:`application`, :attr:`base_scope`, :attr:`component_scope`,
@@ -1036,7 +1089,7 @@ class Settings(object):
 
         """
         Write any unsaved changes to persistent storage and reload any settings
-        that have been changed externally.
+        that have been changed externally
 
         This function is called by :meth:`open` and :meth:`close`.
 
@@ -1136,7 +1189,7 @@ class Settings(object):
 
         """
         The value of the setting identified by some key in the current
-        group.
+        group
 
         If the setting is not found, then
 
@@ -1183,7 +1236,7 @@ class Settings(object):
 
     @property
     def writable(self):
-        """Whether settings can be written by this settings object.
+        """Whether settings can be written by this settings object
 
         This may be :obj:`False` if, for example, the primary location is
         read-only.
@@ -1200,7 +1253,7 @@ class Settings(object):
 
     @classmethod
     def register_format(cls, name, extension, read_func, write_func):
-        """Register a storage format.
+        """Register a storage format
 
         :param str name:
             A string that is unique among settings formats.
@@ -1268,7 +1321,7 @@ class Settings(object):
     @classmethod
     def set_path(cls, format, base_scope, component_scope, path):
 
-        """Set the path used for storing settings in some format and scope.
+        """Set the path used for storing settings in some format and scope
 
         When resolving the path, the strings ``{organization}``,
         ``{application}``, ``{subsystem}``, and ``{extension}`` are substituted

@@ -1,10 +1,10 @@
-"""Conf format.
+"""Conf format
 
 The conf format is registered by default.  It reads and writes settings
 using :mod:`ConfigParser` at locations that are similar to typical Unix
 configuration files---that is, in :file:`.conf` files specific to each
-component scope under :file:`/etc/{organization}` for system settings and
-under :file:`~/.{organization}` for user-specific settings.
+component scope under :file:`/etc/{organization}` for system-wide
+settings and under :file:`~/.{organization}` for user-specific settings.
 
 """
 

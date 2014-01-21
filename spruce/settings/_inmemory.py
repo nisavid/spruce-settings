@@ -1,6 +1,6 @@
-"""In-memory format.
+"""In-memory format
 
-This is a volatile (not persistent) settings storage format.
+This is a volatile (not persistent) settings representation format.
 
 """
 

@@ -1,4 +1,4 @@
-"""Application settings.
+"""Application settings
 
 Some applications require certain settings to exist before they are
 launched.  Some applications require the ability to save certain
