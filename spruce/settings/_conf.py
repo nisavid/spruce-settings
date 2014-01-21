@@ -51,6 +51,7 @@ def _read_settings(file_, keys):
 
 def _write_settings(file_, settings):
     if settings:
+        # FIXME
         raise NotImplementedError('writing \'conf\' settings is not yet'
                                   ' implemented')
 
