@@ -4,6 +4,7 @@ __copyright__ = "Copyright (C) 2014 Ivan D Vasin"
 __docformat__ = "restructuredtext"
 
 from collections import Mapping as _Mapping, namedtuple as _namedtuple
+from contextlib import closing as _closing, contextmanager as _contextmanager
 from datetime import datetime as _datetime, timedelta as _timedelta
 
 from spruce.collections import odict as _odict
@@ -21,22 +22,18 @@ class Settings(object):
 
         settings = _settings.Settings(organization='myorg',
                                       application='myapp')
-        settings.begin_group('dbconn')
-        try:
+        with settings.open(), settings.ingroup('dbconn'):
             dbserver = settings.value('server', required=True)
             dbport = settings.intvalue('port')
             db_entity_tables = settings.listvalue('entity_tables')
-        finally:
-            settings.end_group()
 
     Objects of this class maintain a current group.  By default, there is no
-    current group, but one may be specified by one or more calls to
-    :meth:`begin_group`.  Each subsequent call to :meth:`end_group` negates
-    the effect of the last effective call to :meth:`begin_group`.  For
-    example, specifying a key :code:`'Book/Color'` is equivalent to
-    specifying a key :code:`'Color'` after calling
-    :code:`begin_group('Book')`.  To resolve a relative name to an absolute
-    name using the current group as the basis, use :meth:`absname`.
+    current group, but one may be specified by one or more :meth:`ingroup`
+    contexts.  For example, specifying a key :code:`'Book/Color'` is
+    equivalent to specifying a key :code:`'Color'` in a :keyword:`with`
+    block having the context :code:`ingroup('Book')`.  To resolve a relative
+    name to an absolute name using the current group as the basis, use
+    :meth:`absname`.
 
     The primary settings location is determined from the format, base scope,
     organization, application, and subsystem according to the mapping
@@ -137,6 +134,7 @@ class Settings(object):
         self._deleting = False
         self._format = format
         self._group = None
+        self._isopen = False
         self._keys_in_primarylocation = set()
         self._keystowrite = set()
         self._locations = []
@@ -151,20 +149,9 @@ class Settings(object):
         else:
             self._component_scope = 'organization'
 
-        self.sync()
-
     def __del__(self):
-        # XXX: ensure a final :meth:`sync` before this object is destroyed, but
-        #     *only* if it has been thoroughly initialized prior to
-        #     destruction, which we determine by testing the last bit of state
-        #     set in the constructor
-        # FIXME: settings objects are open resources; implement them as such by
-        #     encapsulating the acquire/release behavior in
-        #     :meth:`open`/:meth:`close` methods accordingly and providing a
-        #     context manager for convenience
-        if hasattr(self, '_component_scope'):
-            self._deleting = True
-            self.sync()
+        self._deleting = True
+        self.close()
 
     def absname(self, name):
         """The absolute name of a group or key.
@@ -268,33 +255,6 @@ class Settings(object):
     @base_scope_fallback.setter
     def base_scope_fallback(self, enabled):
         self._base_scope_fallback = enabled
-
-    def begin_group(self, group):
-        """Append some group to the current group.
-
-        The given group can be nested.
-
-        The current group is prepended to all keys specified to this settings
-        object.  Also, the query methods :attr:`child_groups`,
-        :attr:`child_keys`, and :attr:`all_groups` are based on the current
-        group.
-
-        By default, there is no current group.
-
-        Call :meth:`end_group` to reset the current group to its value prior to
-        the corresponding :meth:`begin_group` call.
-
-        .. seealso:: :meth:`end_group` and :attr:`group`
-
-        :param str group:
-            A group name.
-
-        """
-        if not self.group:
-            self._group = group
-        else:
-            self._previous_groups.append(self.group)
-            self._group += '/' + group
 
     def boolvalue(self, key, default=None, required=False):
 
@@ -448,6 +408,15 @@ class Settings(object):
         self._keystowrite.clear()
         self._keystowrite.add('')
         self._cache = {'': None}
+
+    def close(self):
+        """Close this settings object
+
+        This triggers a call to :meth:`sync`.
+
+        """
+        if self._isopen:
+            self.sync()
 
     @property
     def component_scope(self):
@@ -609,31 +578,6 @@ class Settings(object):
         self._defaults = \
             flatten_defaults(None, defaults if defaults is not None else {})
 
-    def end_group(self):
-
-        """
-        Reset the current group to its value prior to the corresponding
-        :meth:`begin_group` call.
-
-        The corresponding :meth:`begin_group` call is the last one that didn't
-        have a corresponding :meth:`end_group` call.
-
-        .. seealso:: :meth:`begin_group` and :attr:`group`
-
-        :raise RuntimeError:
-            Raised if no current group was set by a corresponding call to
-            :meth:`begin_group`.
-
-        """
-
-        if not self.group:
-            raise RuntimeError('no current group is set')
-
-        if self._previous_groups:
-            self._group = self._previous_groups.pop()
-        else:
-            self._group = None
-
     def floatvalue(self, key, default=None, required=False):
 
         """
@@ -707,16 +651,61 @@ class Settings(object):
 
     @property
     def group(self):
-        """The current group.
+        """The current group
 
         This is an empty string if there is no current group.
 
-        .. seealso:: :meth:`begin_group` and :meth:`end_group`
+        The current group is set by a :keyword:`with` context created by
+        :meth:`ingroup`.  Within such a context, the current group is prepended
+        to all keys specified to this settings object.  Also, the query methods
+        :attr:`child_groups`, :attr:`child_keys`, and :attr:`all_groups` are
+        based on the current group.
+
+        By default, there is no current group.
+
+        .. seealso:: :meth:`ingroup`
 
         :type: :obj:`str`
 
         """
         return self._group if self._group is not None else ''
+
+    @_contextmanager
+    def ingroup(self, group):
+
+        """A context with a new current group
+
+        Upon entering this context, the :attr:`current group <group>` is set to
+        the given *group*.  Upon exiting this context, the current group of the
+        calling context is restored.
+
+        .. seealso:: :attr:`group`
+
+        :param str group:
+            The new current group.  This can be nested.
+
+        :return:
+            A context in which the is the given
+            *group*, evaluated relative to the current group in the calling
+            context.
+        :rtype: context
+
+        """
+
+        if group:
+            if not self.group:
+                self._group = group
+            else:
+                self._previous_groups.append(self.group)
+                self._group += '/' + group
+
+        yield
+
+        if group:
+            if self._previous_groups:
+                self._group = self._previous_groups.pop()
+            else:
+                self._group = None
 
     def intvalue(self, key, default=None, required=False):
 
@@ -880,6 +869,19 @@ class Settings(object):
         """
         return self._locations
 
+    def open(self):
+        """A context in which this settings object is open for access
+
+        Upon entering this context, :meth:`sync` is called.  Upon exiting this
+        context, :meth:`close` is called.
+
+        :rtype: context
+
+        """
+        self._isopen = True
+        self.sync()
+        return _closing(self)
+
     @property
     def organization(self):
         """The organization name used for storing and retrieving settings.
@@ -1036,7 +1038,7 @@ class Settings(object):
         Write any unsaved changes to persistent storage and reload any settings
         that have been changed externally.
 
-        This function is called by :meth:`!__init__` and :meth:`!__del__`.
+        This function is called by :meth:`open` and :meth:`close`.
 
         .. warning:: **Bug:**
             Writing settings in the conf format is not yet implemented, so
