@@ -1,67 +1,4 @@
-"""Application settings core
-
-
-********
-Examples
-********
-
-Single use
-==========
-
-::
-
-    import spruce.settings as _settings
-
-    settings = _settings.Settings(organization='myorg',
-                                  application='myapp')
-    with settings.open(), settings.ingroup('db'):
-        dbserver = settings.value('server', required=True)
-        dbport = settings.intvalue('port')
-        db_entity_tables = settings.listvalue('entity_tables')
-
-
-Multiple uses
-=============
-
-::
-
-    import spruce.settings as _settings
-
-    settings = _settings.Settings(organization='myorg',
-                                  application='myapp')
-    with settings.open():
-        with settings.ingroup('dbconn'):
-            dbserver = settings.value('server', required=True)
-            dbport = settings.intvalue('port')
-
-        with settings.ingroup('dbtables'):
-            db_entity_tables = settings.listvalue('entity_tables')
-
-
-Factory method
-==============
-
-::
-
-    from collections import namedtuple as _namedtuple
-
-    import spruce.settings as _settings
-
-    class User(_namedtuple('User', ('name', 'password'))):
-        @classmethod
-        def from_settings(cls, settings, group=None, name_key='name',
-                          password_key='password'):
-            with settings.ingroup(group):
-                name = settings.value(name_key, required=True)
-                password = settings.value(password_key, required=True)
-            return cls(name=name, password=password)
-
-    settings = _settings.Settings(organization='myorg',
-                                  application='myapp')
-    with settings.open():
-        user = User.from_settings(settings, 'user')
-
-"""
+"""Application settings core"""
 
 __copyright__ = "Copyright (C) 2014 Ivan D Vasin"
 __docformat__ = "restructuredtext"
@@ -107,7 +44,7 @@ class Settings(object):
 
     This class is inspired by the `QSettings API`_.
 
-    .. _`QSettings API`: http://doc.qt.nokia.com/qsettings.html
+    .. _`QSettings API`: http://qt-project.org/doc/qt-5/QSettings.html
 
     .. warning::
         The mutator methods (:meth:`clear`, :meth:`remove`, and
