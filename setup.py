@@ -19,6 +19,8 @@ VERSION = '0.2.1'
 
 SITE_URI = ''
 
+DOWNLOAD_URI = 'https://github.com/nisavid/spruce-settings'
+
 DESCRIPTION = 'Application settings'
 
 README_FILE = 'README.rst'
@@ -91,6 +93,7 @@ if __name__ == '__main__':
     _setup(name=NAME,
            version=VERSION,
            url=SITE_URI,
+           download_url=DOWNLOAD_URI,
            description=DESCRIPTION,
            long_description=LONG_DESCRIPTION,
            author=', '.join(__credits__),
