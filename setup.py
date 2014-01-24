@@ -15,7 +15,7 @@ NAME_NOPREFIX = 'settings'
 
 NAME = 'Spruce-' + NAME_NOPREFIX
 
-VERSION = '0.2.1'
+VERSION = '0.2.2'
 
 SITE_URI = ''
 
